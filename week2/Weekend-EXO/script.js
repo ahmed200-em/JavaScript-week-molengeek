@@ -16,7 +16,7 @@ let rooms = [
     name: 'Room 2',
     items: 'key',
     energyCost: 20,
-    isLocked: true
+    isLocked: false
   },
   {
     name: 'Room 3',
@@ -28,22 +28,21 @@ let rooms = [
     name: 'Room 4',
     items: 'gem',
     energyCost: 5,
-    isLocked: false
+    isLocked: true
   },
   {
     name: 'Room 5',
     items: 'coins',
-    energyCost: 45,
+    energyCost: 65,
     isLocked: false
   }
 ]
 // ! displayRooms function
-function displayRooms (arr) {
-  arr.forEach(element => {
+function displayRooms () {
+  rooms.forEach(element => {
     console.log(element.name, element.energyCost, element.isLocked)
   })
 }
-displayRooms(rooms)
 
 //  ! enterRoom function
 function enterRoom (roomName) {
@@ -56,47 +55,45 @@ function enterRoom (roomName) {
       console.log(`Error : ${roomName} Does not exist.`)
       return
     }
-    if (player.energy >= rm.energyCost) {
-      player.energy -= rm.energyCost
-      player.currentRoom = rm.name
-      console.log(`Success! You entered ${rm.name}.`)
-      console.log(`Remaining Energy: ${player.energy}`)
+    if (rm.isLocked === true) {
+      console.log(`the ${roomName} is Locked, Go find the key `)
+      return
     } else {
-      console.log('Not enough energy!')
+      if (player.energy > rm.energyCost) {
+        player.energy -= rm.energyCost
+        player.currentRoom = rm.name
+        console.log(`Success! You entered ${rm.name}.`)
+        console.log(`Remaining Energy: ${player.energy}`)
+      } else {
+        console.log('Not enough energy!')
+        player.isAlive = false
+        console.log('Game Over')
+      }
     }
   }
 }
-enterRoom('Room 2')
-// enterRoom('Room 1')
 
 //  ! collectItem function
 function collectItem () {
   const currentRoomObj = rooms.find(room => room.name === player.currentRoom)
-  if (!currentRoomObj || !currentRoomObj.items) {
+  if (!currentRoomObj.items) {
     console.log('There is nothing to collect here.')
     return
   }
-  const itemInRoom = currentRoomObj.items
+  let itemInRoom = currentRoomObj.items
   if (player.inventory.includes(itemInRoom)) {
     console.log(`You already have the ${itemInRoom} in your inventory.`)
   } else {
     player.inventory.push(itemInRoom)
+    currentRoomObj.items = null
     console.log(`You picked up the ${itemInRoom}!`)
   }
 }
-collectItem()
-console.log(player.inventory)
-enterRoom('Room 1')
-collectItem()
-console.log(player.inventory)
-enterRoom('Room 4')
-collectItem()
-console.log(player.inventory)
 
 // ! unlockRoom function
-function unlockRoom () {
+function unlockRoom (roomName) {
   if (player.inventory.includes('key')) {
-    const rm = rooms.find(room => room.name === player.currentRoom)
+    const rm = rooms.find(room => room.name === roomName)
     if (rm.isLocked === true) {
       rm.isLocked = false
       console.log(`You unlocked ${rm.name}!`)
@@ -107,15 +104,18 @@ function unlockRoom () {
     console.log("You don't have the key to unlock this room.")
   }
 }
-unlockRoom()
 
-//  !  removeItem function
-function removeItem () {
-  player.inventory.splice(player.inventory.indexOf('key'), 1)
-  return
+//  ! removeItem function
+function removeItem (toDelete) {
+  if (player.inventory.indexOf(toDelete) != -1) {
+    player.inventory.splice(player.inventory.indexOf(toDelete), 1)
+    return
+  }
+  else{
+    console.log('not found !');
+    
+  }
 }
-removeItem()
-console.log(player.inventory)
 
 //  ! showInventory function
 function showInventory () {
@@ -123,18 +123,40 @@ function showInventory () {
     console.log(element)
   })
 }
-showInventory()
 
 //  ! sortRoomsByEnergy function
 function sortRoomsByEnergy () {
-  let cost = rooms.sort((a, b) => a.energyCost - b.energyCost)
-  console.log(rooms.map(room => room.energyCost))
+  rooms.sort((a, b) => a.energyCost - b.energyCost)
+  let energySort = rooms.map(room => room.energyCost)
+  console.log(energySort);
+  
 }
+
+// ! Playing the game
+displayRooms()
+collectItem()
+enterRoom('Room 2')
+console.log(player.inventory)
+
+collectItem()
+enterRoom('Room 5')
+console.log(player.inventory)
+collectItem()
+console.log(player.inventory)
+unlockRoom('Room 4')
+removeItem('key')
+console.log(player.inventory)
+enterRoom('Room 4')
+collectItem()
+showInventory()
 sortRoomsByEnergy()
 
-console.log(`<----- GAME REPORT ----->`)
+rooms.forEach(element => {
+  console.log(element.energyCost)
+})
 
 //  ! generateGameReport function
+console.log(`<----- GAME REPORT ----->`)
 function generateGameReport () {
   console.log(`Player current room: ${player.currentRoom}`)
   console.log(`Player energy: ${player.energy}`)
