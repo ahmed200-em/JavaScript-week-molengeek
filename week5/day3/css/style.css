@@ -1,0 +1,10 @@
+.product {
+  padding: 15px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.high-price {
+  background-color: #ffe0e0;
+}
